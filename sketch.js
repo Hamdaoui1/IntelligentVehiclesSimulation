@@ -3,6 +3,9 @@
 const nbVehicles = 10;
 let vehicles = [];
 let target;
+let interval; // Intervalle pour modifier la direction de la cible
+let mouseFollower; // Véhicule suivant la souris
+let seeker; // Véhicule avec arrive() sur mouseFollower
 
 function setup() {
   createCanvas(800, 800);
@@ -10,8 +13,14 @@ function setup() {
   // Créer une cible initiale
   target = createRandomTarget();
 
-  // Créer des véhicules
+  // Créer des véhicules de base 
   createVehicles(nbVehicles);
+
+  // Créer un véhicule qui suit la souris
+  mouseFollower = new Vehicle(random(width), random(height));
+
+  // Créer un véhicule qui arrive sur le mouseFollower
+  seeker = new Vehicle(random(width), random(height));
 
   // Définir un intervalle pour changer la direction de la cible toutes les secondes
   interval = setInterval(() => {
@@ -53,6 +62,18 @@ function draw() {
     vehicle.update();
     vehicle.show();
   });
+  // Comportement : véhicule suivant la souris
+  let mouseTarget = createVector(mouseX, mouseY);
+  let mouseSteering = mouseFollower.seek(mouseTarget);
+  mouseFollower.applyForce(mouseSteering);
+  mouseFollower.update();
+  mouseFollower.show();
+
+  // Comportement : véhicule arrive() sur le mouseFollower
+  let seekerSteering = seeker.arrive(mouseFollower.pos);
+  seeker.applyForce(seekerSteering);
+  seeker.update();
+  seeker.show();
 }
 
 function createRandomTarget() {
