@@ -7,11 +7,16 @@ let target;
 function setup() {
   createCanvas(800, 800);
 
-  // Create random initial target
+  // Créer une cible initiale
   target = createRandomTarget();
 
-  // Create vehicles
+  // Créer des véhicules
   createVehicles(nbVehicles);
+
+  // Définir un intervalle pour changer la direction de la cible toutes les secondes
+  interval = setInterval(() => {
+    target = createRandomTarget();
+  }, 1000); // 1000 ms = 1 seconde
 }
 
 function createVehicles(nbVehicles) {
@@ -25,28 +30,25 @@ function createVehicles(nbVehicles) {
 function draw() {
   background(0);
 
-  // Draw target
+  // Dessiner la cible
   fill(255, 0, 0);
   noStroke();
   ellipse(target.x, target.y, 32);
 
-  // Update vehicles behavior
+  // Mettre à jour le comportement des véhicules
   vehicles.forEach((vehicle, index) => {
     let steering;
 
     if (index === 0) {
-      // First vehicle: arrives at the target
+      // Le premier véhicule se dirige vers la cible
       steering = vehicle.arrive(target);
-      if (vehicleReachedTarget(vehicle)) {
-        target = createRandomTarget(); // Move the target randomly once reached
-      }
     } else {
-      // Subsequent vehicles follow the previous one
+      // Les véhicules suivants suivent le précédent
       let newTarget = vehicles[index - 1].pos;
       steering = vehicle.arrive(newTarget, 40);
     }
 
-    // Apply force and update vehicle
+    // Appliquer la force et mettre à jour le véhicule
     vehicle.applyForce(steering);
     vehicle.update();
     vehicle.show();
@@ -59,12 +61,22 @@ function createRandomTarget() {
   return createVector(x, y);
 }
 
-function vehicleReachedTarget(vehicle) {
-  return p5.Vector.dist(vehicle.pos, target) < 10;
-}
+// function vehicleReachedTarget(vehicle) {
+//   return p5.Vector.dist(vehicle.pos, target) < 10;
+// }
 
 function keyPressed() {
   if (key === 'd') {
+    // Basculer le mode debug pour les véhicules
     Vehicle.debug = !Vehicle.debug;
+    console.log(`Debug mode is now ${Vehicle.debug ? "ON" : "OFF"}`);
+  }
+
+  if (key === 'x') {
+    // Arrêter l'intervalle si nécessaire
+    clearInterval(interval);
+    console.log("Interval stopped.");
   }
 }
+
+
