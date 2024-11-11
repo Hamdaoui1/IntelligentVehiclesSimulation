@@ -1,11 +1,11 @@
-// Updated version of sketch.js with the requested modifications
-
 const nbVehicles = 10;
+const nbAdditionalVehicles = 5; // Nombre de véhicules supplémentaires qui suivent le premier en chaîne
 let vehicles = [];
 let target;
 let interval; // Intervalle pour modifier la direction de la cible
 let mouseFollower; // Véhicule suivant la souris
 let seeker; // Véhicule avec arrive() sur mouseFollower
+let formationVehicles = []; // Véhicules en formation autour du premier véhicule
 
 function setup() {
   createCanvas(800, 800);
@@ -22,6 +22,12 @@ function setup() {
   // Créer un véhicule qui arrive sur le mouseFollower
   seeker = new Vehicle(random(width), random(height));
 
+  // Créer des véhicules supplémentaires qui suivent le premier en chaîne
+  createAdditionalVehicles(nbAdditionalVehicles);
+
+  // Créer des véhicules en formation en V autour du premier véhicule
+  createFormationVehicles();
+
   // Définir un intervalle pour changer la direction de la cible toutes les secondes
   interval = setInterval(() => {
     target = createRandomTarget();
@@ -33,6 +39,28 @@ function createVehicles(nbVehicles) {
     let x = random(width);
     let y = random(height);
     vehicles.push(new Vehicle(x, y));
+  }
+}
+
+function createAdditionalVehicles(nbAdditionalVehicles) {
+  for (let i = 0; i < nbAdditionalVehicles; i++) {
+    let x = random(width);
+    let y = random(height);
+    vehicles.push(new Vehicle(x, y));
+  }
+}
+
+function createFormationVehicles() {
+  const leader = vehicles[0];
+  const offsetDistance = 100;
+  const angleOffset = PI / 6; // 30 degrees for V formation
+
+  for (let i = 0; i < 5; i++) {
+    let offsetAngle = angleOffset * (i - 2); // Place vehicles in a V shape
+    let offsetX = offsetDistance * cos(offsetAngle);
+    let offsetY = offsetDistance * sin(offsetAngle);
+    let newVehicle = new Vehicle(leader.pos.x + offsetX, leader.pos.y + offsetY);
+    formationVehicles.push(newVehicle);
   }
 }
 
@@ -50,7 +78,7 @@ function draw() {
 
     if (index === 0) {
       // Le premier véhicule se dirige vers la cible
-      steering = vehicle.arrive(target);
+      steering = vehicle.arrive(target, 100); // Modifier pour que la vitesse désirée soit nulle à une distance de 100
     } else {
       // Les véhicules suivants suivent le précédent
       let newTarget = vehicles[index - 1].pos;
@@ -62,6 +90,18 @@ function draw() {
     vehicle.update();
     vehicle.show();
   });
+
+  // Mettre à jour le comportement des véhicules en formation
+  formationVehicles.forEach((vehicle, index) => {
+    let leader = vehicles[0];
+    let target = createVector(leader.pos.x + 100 * cos(PI / 6 * (index - 2)), leader.pos.y + 100 * sin(PI / 6 * (index - 2)));
+    let steering = vehicle.arrive(target, 40);
+
+    vehicle.applyForce(steering);
+    vehicle.update();
+    vehicle.show();
+  });
+
   // Comportement : véhicule suivant la souris
   let mouseTarget = createVector(mouseX, mouseY);
   let mouseSteering = mouseFollower.seek(mouseTarget);
@@ -99,5 +139,3 @@ function keyPressed() {
     console.log("Interval stopped.");
   }
 }
-
-
