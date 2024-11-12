@@ -1,4 +1,3 @@
-// Updated version of vehicle.js with modifications to implement the requested behavior
 
 class Vehicle {
   static debug = false;
@@ -13,28 +12,22 @@ class Vehicle {
     this.rayonZoneDeFreinage = 100;
   }
 
-  evade(vehicle) {
-    let pursuit = this.pursue(vehicle);
-    pursuit.mult(-1);
-    return pursuit;
+  hasReachedTarget(target) {
+    let distance = p5.Vector.dist(this.pos, target);
+    return distance < this.r; // Considérer le véhicule comme arrivé si la distance est inférieure à son rayon
   }
 
-  pursue(vehicle) {
-    let target = vehicle.pos.copy();
-    let prediction = vehicle.vel.copy();
-    prediction.mult(10);
-    target.add(prediction);
-    fill(0, 255, 0);
-    circle(target.x, target.y, 16);
-    return this.seek(target);
+  explode() {
+    fill(255, 150, 0);
+    noStroke();
+    for (let i = 0; i < 10; i++) {
+      let offset = p5.Vector.random2D().mult(random(5, 20));
+      ellipse(this.pos.x + offset.x, this.pos.y + offset.y, random(5, 10));
+    }
   }
 
   arrive(target, d = 0) {
     return this.seek(target, true, d);
-  }
-
-  flee(target) {
-    // recopier code de flee de l'exemple précédent
   }
 
   seek(target, arrival = false, d) {
@@ -96,23 +89,5 @@ class Vehicle {
     } else if (this.pos.y < -this.r) {
       this.pos.y = height + this.r;
     }
-  }
-}
-
-class Target extends Vehicle {
-  constructor(x, y) {
-    super(x, y);
-    this.vel = p5.Vector.random2D();
-    this.vel.mult(5);
-  }
-
-  show() {
-    stroke(255);
-    strokeWeight(2);
-    fill("#F063A4");
-    push();
-    translate(this.pos.x, this.pos.y);
-    circle(0, 0, this.r * 2);
-    pop();
   }
 }
