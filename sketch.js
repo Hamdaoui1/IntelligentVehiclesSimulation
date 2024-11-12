@@ -85,7 +85,6 @@ function draw() {
     createVehicles(nbVehicles); // Créer des véhicules une fois que les cibles ont atteint leurs positions finales
   }
 
-  // Mettre à jour le comportement des véhicules une fois qu'ils ont commencé
   if (vehiclesStarted) {
     vehicles.forEach((vehicle, index) => {
       if (index < movingTargets.length && !vehiclesArrived[index]) {
